@@ -1,0 +1,5 @@
+spring:
+  config:
+    name: pay-mall-app
+  profiles:
+    active: dev
