@@ -1,33 +1,43 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* 修改后的CSS */
 body {
   font-family: "Poppins", sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #e24a4a; /* 红色背景 */
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0;
 }
 
 .container {
   background-color: #ffffff;
-  padding: 40px;
   border-radius: 10px;
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-  width: 400px;
+  width: 700px;
   max-width: 90%;
+  position: relative;
 }
 
-.login-form h2 {
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 30px;
+}
+
+.logo-side {
+  flex: 0 0 40%;
+  padding: 20px;
   text-align: center;
-  color: #333;
-  margin-bottom: 30px;
+}
+
+.logo-img {
+  max-width: 100%;
+  height: auto;
+}
+
+.login-form {
+  flex: 1;
+  padding-left: 30px;
 }
 
 .input-group {
@@ -47,32 +57,32 @@ body {
   transition: 0.3s;
 }
 
+/* 核心修改：标签始终在横线上方 */
 .input-group label {
   position: absolute;
-  top: 0;
+  top: -5px; /* 直接定位到横线上方 */
   left: 0;
-  padding: 10px 0;
-  font-size: 16px;
-  color: #666;
-  pointer-events: none;
+  font-size: 13px;
+  color: #999;
   transition: 0.3s;
+  pointer-events: none;
 }
 
 .input-group input:focus ~ label,
 .input-group input:valid ~ label {
   top: -20px;
   font-size: 12px;
-  color: #667eea;
+  color: #e24a4a;
 }
 
 .input-group input:focus {
-  border-bottom: 2px solid #667eea;
+  border-bottom: 2px solid #e24a4a;
 }
 
 button {
   width: 100%;
   padding: 12px;
-  background: #667eea;
+  background: #e24a4a;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -82,14 +92,22 @@ button {
 }
 
 button:hover {
-  background: #764ba2;
+  background: #F03A3A;
 }
 
-.error-message {
-  color: #ff3860;
-  font-size: 14px;
-  text-align: center;
-  margin-top: 10px;
-  display: none;
-}
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .login-wrapper {
+    flex-direction: column;
+  }
 
+  .logo-side {
+    margin-bottom: 30px;
+    padding: 0;
+  }
+
+  .login-form {
+    padding-left: 0;
+    width: 100%;
+  }
+}

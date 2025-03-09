@@ -8,21 +8,25 @@
 </head>
 <body>
 <div class="container">
-    <form id="loginForm" class="login-form">
-        <h2>欢迎登录 - 拼少少平台</h2>
-        <div class="input-group">
-            <input type="text" id="username" required>
-            <label for="username">用户名</label>
+    <div class="login-wrapper">
+        <div class="logo-side">
+            <img src="./images/logo.png" alt="平台logo" class="logo-img">
         </div>
-        <div class="input-group">
-            <input type="password" id="password" required>
-            <label for="password">密码</label>
-        </div>
-        <button type="submit">登录</button>
-        <p class="error-message" id="errorMessage"></p>
-    </form>
+        <form id="loginForm" class="login-form">
+            <h2>欢迎登录 - 拼团易购平台</h2>
+            <div class="input-group">
+                <input type="text" id="username" required>
+                <label for="username">用户名</label>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" required>
+                <label for="password">密码</label>
+            </div>
+            <button type="submit">登录</button>
+            <p class="error-message" id="errorMessage"></p>
+        </form>
+    </div>
 </div>
 <script src="js/login.js"></script>
 </body>
 </html>
-
