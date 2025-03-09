@@ -16,8 +16,8 @@ thread:
 spring:
   datasource:
     username: root
-    password: qwaszx134137
-    url: jdbc:mysql://127.0.0.1:3306/pay-mall?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
+    password: 123456
+    url: jdbc:mysql://123.57.226.115:3306/pay-mall?useUnicode=true&characterEncoding=utf8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=true
     driver-class-name: com.mysql.cj.jdbc.Driver
   hikari:
     pool-name: Retail_HikariCP
@@ -64,5 +64,5 @@ ltzf:
       app_id: 1109501     # 应用者 Id
       mch_id: 1698731613  # 商户号
       partner_key: "92e72771d4d3e75de9086c2e5e2a27e3"   # 密钥
-      notify_url: "http://xiaoming-programming.top"  # 回调地址
+      notify_url: "http://123.57.226.115:8099/api/pay/pay_notify"  # 回调地址
       return_url: "http://xiaoming-programming.top"  # 跳转地址

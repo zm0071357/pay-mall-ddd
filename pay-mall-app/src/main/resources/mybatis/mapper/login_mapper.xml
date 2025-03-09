@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pay.mall.infrastructure.dao.LoginDao">
+
+    <resultMap id="dataMap" type="pay.mall.infrastructure.dao.po.Login">
+        <id column="id" property="id"/>
+        <result column="account" property="account"/>
+        <result column="password" property="password"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="addUser" parameterType="pay.mall.infrastructure.dao.po.Login">
+        insert into login(account, password, create_time, update_time)
+        values (#{account}, #{password}, now(), now())
+    </insert>
+
+    <select id="queryUserByAccountAndPassWord" parameterType="pay.mall.infrastructure.dao.po.Login" resultType="int">
+        select count(id) from login
+        where account = #{account} and password = #{password}
+    </select>
+
+</mapper>

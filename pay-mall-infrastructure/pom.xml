@@ -17,4 +17,39 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.mybatis.spring.boot</groupId>
+            <artifactId>mybatis-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <!-- 系统模块 -->
+        <dependency>
+            <groupId>top.xiaoming-programming</groupId>
+            <artifactId>pay-mall-domain</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>pay-mall-infrastructure</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-archetype-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create-from-project</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
 </project>
