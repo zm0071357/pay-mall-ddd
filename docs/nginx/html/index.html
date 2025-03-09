@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼少少 - 商品详情页</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+<!-- 轮播图 -->
+<div class="swiper-container">
+    <div class="swiper-wrapper">
+        <div class="swiper-slide"><img src="./images/sku-01.jpg"></div>
+        <div class="swiper-slide"><img src="./images/sku-02.jpg"></div>
+        <div class="swiper-slide"><img src="./images/sku-03.jpg"></div>
+    </div>
+    <div class="swiper-pagination"></div>
+</div>
+
+<!-- 商品信息 -->
+<div class="product-info">
+    <h1 class="product-title">原切香脆薯条解馋休闲小零食</h1>
+    <span class="promotion-tag">大促优惠</span>
+    <span class="promotion-text">直降 ¥15，76人再抢，参与马上抢到</span>
+</div>
+
+<!-- 修改后的拼单列表结构 -->
+<div class="group-list">
+    <div class="group-item">
+        <div>
+            <div class="user-info">LZM</div>
+            <div class="group-status">
+                <span>组队仅剩1人，拼单即将结束</span>
+                <span class="countdown">00:05:49</span>
+            </div>
+        </div>
+        <div class="right">
+            <button class="group-btn" data-price="1.68">参与拼团</button>
+        </div>
+    </div>
+    <div class="group-item">
+        <div>
+            <div class="user-info">HZT</div>
+            <div class="group-status">
+                <span>组队仅剩2人，拼单即将结束</span>
+                <span class="countdown">00:05:49</span>
+            </div>
+        </div>
+        <div class="right">
+            <button class="group-btn" data-price="1.68">参与拼团</button>
+        </div>
+    </div>
+    <div class="group-item">
+        <div>
+            <div class="user-info">JJK</div>
+            <div class="group-status">
+                <span>组队仅剩1人，拼单即将结束</span>
+                <span class="countdown">00:05:49</span>
+            </div>
+        </div>
+        <div class="right">
+            <button class="group-btn" data-price="1.68">参与拼团</button>
+        </div>
+    </div>
+</div>
+
+<!-- 空白区域 -->
+<div class="area"></div>
+
+<!-- 底部操作栏 -->
+<div class="action-bar">
+    <button class="action-btn buy-alone" data-price="1.68">单独购买(￥1.68)</button>
+    <button class="action-btn group-buy" data-price="1.68">开团购买(￥1.68)</button>
+</div>
+
+<!-- 支付弹窗 -->
+<div id="paymentModal" class="modal">
+    <div class="modal-content">
+        <h2>请扫码支付</h2>
+        <p id="paymentAmount"></p>
+        <img src="./images/sku-04.png" alt="支付二维码" class="qr-code">
+        <div class="button-group">
+            <button id="cancelPayment">取消支付</button>
+            <button id="completePayment">支付完成</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/index.js"></script>
+</body>
+</html>
+
