@@ -4,10 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import pay.mall.domain.order.adapter.port.ProductPort;
 import pay.mall.domain.order.adapter.repository.OrderRepository;
 import pay.mall.domain.order.model.aggregate.CreateOrderAggregate;
-import pay.mall.domain.order.model.entity.OrderEntity;
-import pay.mall.domain.order.model.entity.PayOrderEntity;
-import pay.mall.domain.order.model.entity.ProductEntity;
-import pay.mall.domain.order.model.entity.ShopCartEntity;
+import pay.mall.domain.order.model.entity.*;
+import pay.mall.domain.order.model.valobj.MarketTypeVO;
 import pay.mall.domain.order.model.valobj.OrderStatusVO;
 
 import java.io.IOException;
@@ -43,12 +41,38 @@ public abstract class AbstractOrderService implements OrderService {
         } else if (null != unpaidOrderEntity && OrderStatusVO.CREATE.equals(unpaidOrderEntity.getOrderStatusVO())) {
             // 支付
             log.info("创建订单-存在，存在未创建支付单订单，创建支付单开始 userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
-            PayOrderEntity payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getTotalAmount());
+            Integer marketType = unpaidOrderEntity.getMarketType();
+            BigDecimal marketDeductionAmount = unpaidOrderEntity.getMarketDeductionAmount();
+            PayOrderEntity payOrderEntity = null;
+            // 营销锁单出现异常导致未成功抵消价格
+            // 重新进行营销锁单
+            if (MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(marketType) && null == marketDeductionAmount) {
+                log.info("营销锁单出现异常导致未成功抵消价格 - 重新进行营销锁单");
+                MarketPayDiscountEntity marketPayDiscountEntity = this.lockMarketPayOrder(shopCartEntity.getUserId(),
+                        shopCartEntity.getTeamId(),
+                        shopCartEntity.getActivityId(),
+                        shopCartEntity.getProductId(),
+                        unpaidOrderEntity.getOrderId());
+
+                payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(),
+                        unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getTotalAmount(), marketPayDiscountEntity);
+            // 锁单成功
+            } else if (MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(marketType)) {
+                log.info("锁单成功");
+                payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(),
+                        unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getPayAmount());
+            // 未进行营销
+            } else {
+                log.info("未进行营销");
+                payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(),
+                        unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getTotalAmount());
+            }
             return PayOrderEntity.builder()
                     .orderId(payOrderEntity.getOrderId())
                     .payUrl(payOrderEntity.getPayUrl())
                     .build();
         }
+
         // 正常创建订单
         log.info("创建订单-不存在，正常创建订单。创建订单开始 userId:{} productId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId());
         // 查询商品信息
@@ -59,9 +83,29 @@ public abstract class AbstractOrderService implements OrderService {
                 .productEntity(productEntity)
                 .orderEntity(orderEntity)
                 .build();
+
         // 保存订单
         this.doSaveOrder(orderAggregate);
-        PayOrderEntity payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(), productEntity.getProductName(), orderEntity.getOrderId(), productEntity.getPrice());
+
+        // 营销锁单
+        MarketPayDiscountEntity marketPayDiscountEntity = null;
+        if (MarketTypeVO.GROUP_BUY_MARKET.equals(shopCartEntity.getMarketTypeVO())) {
+            log.info("进行营销锁单");
+            marketPayDiscountEntity = this.lockMarketPayOrder(shopCartEntity.getUserId(),
+                    shopCartEntity.getTeamId(),
+                    shopCartEntity.getActivityId(),
+                    shopCartEntity.getProductId(),
+                    orderEntity.getOrderId());
+        }
+
+        // 创建支付单
+        PayOrderEntity payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(),
+                shopCartEntity.getProductId(),
+                productEntity.getProductName(),
+                orderEntity.getOrderId(),
+                productEntity.getPrice(),
+                marketPayDiscountEntity);
+
         log.info("创建订单-完成，生成支付单。userId: {} orderId: {} payUrl: {}", shopCartEntity.getUserId(), orderEntity.getOrderId(), payOrderEntity.getPayUrl());
         return PayOrderEntity.builder()
                 .orderId(orderEntity.getOrderId())
@@ -69,6 +113,28 @@ public abstract class AbstractOrderService implements OrderService {
                 .build();
     }
 
+    /**
+     * 营销锁单 - 预支付
+     * @param userId
+     * @param productId
+     * @param productName
+     * @param orderId
+     * @param totalAmount
+     * @param marketPayDiscountEntity
+     * @return
+     */
+    protected abstract PayOrderEntity doPrepayOrder(String userId, String productId, String productName, String orderId, BigDecimal totalAmount, MarketPayDiscountEntity marketPayDiscountEntity) throws IOException;
+
+    /**
+     * 锁单
+     * @param userId
+     * @param teamId
+     * @param activityId
+     * @param productId
+     * @param orderId
+     * @return
+     */
+    protected abstract MarketPayDiscountEntity lockMarketPayOrder(String userId, String teamId, Long activityId, String productId, String orderId);
 
     /**
      * 插入订单
@@ -86,5 +152,6 @@ public abstract class AbstractOrderService implements OrderService {
      * @return
      */
     protected abstract PayOrderEntity doPrepayOrder(String userId, String productId, String productName, String orderId, BigDecimal totalAmount) throws IOException;
+
 
 }

@@ -17,4 +17,20 @@ public class CreatePayRequestDTO {
      * 商品ID
      */
     private String productId;
+
+    /**
+     * 拼团ID
+     */
+    private String teamId;
+
+    /**
+     * 活动ID
+     */
+    private Long activityId;
+
+    /**
+     * 营销类型 - 0无营销
+     */
+    private Integer marketType = 0;
+
 }

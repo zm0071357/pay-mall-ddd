@@ -11,12 +11,14 @@ import pay.mall.domain.order.model.entity.OrderEntity;
 import pay.mall.domain.order.model.entity.PayOrderEntity;
 import pay.mall.domain.order.model.entity.ProductEntity;
 import pay.mall.domain.order.model.entity.ShopCartEntity;
+import pay.mall.domain.order.model.valobj.MarketTypeVO;
 import pay.mall.domain.order.model.valobj.OrderStatusVO;
 import pay.mall.infrastructure.dao.PayOrderDao;
 import pay.mall.infrastructure.dao.po.PayOrder;
 import pay.mall.types.event.BaseEvent;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -46,6 +48,10 @@ public class OrderRepositoryImpl implements OrderRepository {
         order.setOrderTime(orderEntity.getOrderTime());
         order.setTotalAmount(productEntity.getPrice());
         order.setStatus(orderEntity.getOrderStatusVO().getCode());
+        order.setMarketType(MarketTypeVO.NO_MARKET.getCode());
+        order.setMarketDeductionAmount(BigDecimal.ZERO);
+        order.setPayAmount(productEntity.getPrice());
+        order.setMarketType(order.getMarketType());
 
         payOrderDao.insert(order);
     }
@@ -70,6 +76,9 @@ public class OrderRepositoryImpl implements OrderRepository {
                 .orderTime(order.getOrderTime())
                 .totalAmount(order.getTotalAmount())
                 .payUrl(order.getPayUrl())
+                .marketType(order.getMarketType())
+                .marketDeductionAmount(order.getMarketDeductionAmount())
+                .payAmount(order.getPayAmount())
                 .build();
     }
 
@@ -80,6 +89,9 @@ public class OrderRepositoryImpl implements OrderRepository {
                 .orderId(payOrderEntity.getOrderId())
                 .status(payOrderEntity.getOrderStatus().getCode())
                 .payUrl(payOrderEntity.getPayUrl())
+                .marketType(payOrderEntity.getMarketType())
+                .marketDeductionAmount(payOrderEntity.getMarketDeductionAmount())
+                .payAmount(payOrderEntity.getPayAmount())
                 .build();
         payOrderDao.updateOrderPayInfo(payOrderReq);
     }

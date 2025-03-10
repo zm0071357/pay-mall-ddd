@@ -73,6 +73,21 @@ public class PayOrder {
     private Date payTime;
 
     /**
+     * 营销类型：0 无营销、1 拼团营销
+     */
+    private Integer marketType;
+
+    /**
+     * 优惠金额
+     */
+    private BigDecimal marketDeductionAmount;
+
+    /**
+     * 支付金额
+     */
+    private BigDecimal payAmount;
+
+    /**
      * 创建时间
      */
     private Date createTime;

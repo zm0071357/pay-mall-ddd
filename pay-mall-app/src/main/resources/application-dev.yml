@@ -66,3 +66,12 @@ ltzf:
       partner_key: "92e72771d4d3e75de9086c2e5e2a27e3"   # 密钥
       notify_url: "http://xiaoming-programming.top"  # 回调地址
       return_url: "http://xiaoming-programming.top"  # 跳转地址
+
+app:
+  config:
+    cross-origin: '*'
+    group-buy-market:
+      api-url: "http://localhost:8091"
+      notify-url: "http://localhost:8091/api/test/group_buy_notify"
+      source: s01
+      channel: c01

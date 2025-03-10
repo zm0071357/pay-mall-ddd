@@ -1,5 +1,6 @@
 package pay.mall.domain.order.adapter.port;
 
+import pay.mall.domain.order.model.entity.MarketPayDiscountEntity;
 import pay.mall.domain.order.model.entity.ProductEntity;
 
 /**
@@ -15,4 +16,15 @@ public interface ProductPort {
      * @return
      */
     ProductEntity queryProductByProductId(String productId);
+
+    /**
+     * 锁单
+     * @param userId
+     * @param teamId
+     * @param activityId
+     * @param productId
+     * @param orderId
+     * @return
+     */
+    MarketPayDiscountEntity lockMarketPayOrder(String userId, String teamId, Long activityId, String productId, String orderId);
 }

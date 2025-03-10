@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import pay.mall.domain.order.adapter.port.ProductPort;
 import pay.mall.domain.order.adapter.repository.OrderRepository;
 import pay.mall.domain.order.model.aggregate.CreateOrderAggregate;
+import pay.mall.domain.order.model.entity.MarketPayDiscountEntity;
 import pay.mall.domain.order.model.entity.PayOrderEntity;
+import pay.mall.domain.order.model.valobj.MarketTypeVO;
 import pay.mall.domain.order.model.valobj.OrderStatusVO;
 
 import javax.annotation.Resource;
@@ -43,17 +45,30 @@ public class OrderServiceImpl extends AbstractOrderService {
     }
 
     @Override
+    protected MarketPayDiscountEntity lockMarketPayOrder(String userId, String teamId, Long activityId, String productId, String orderId) {
+        return productPort.lockMarketPayOrder(userId, teamId, activityId, productId, orderId);
+    }
+
+    @Override
     protected void doSaveOrder(CreateOrderAggregate orderAggregate) {
         orderRepository.doSaveOrder(orderAggregate);
     }
 
     @Override
     protected PayOrderEntity doPrepayOrder(String userId, String productId, String productName, String orderId, BigDecimal totalAmount) throws IOException {
+        return doPrepayOrder(userId, productId, productName, orderId, totalAmount, null);
+    }
+
+    @Override
+    protected PayOrderEntity doPrepayOrder(String userId, String productId, String productName, String orderId, BigDecimal totalAmount, MarketPayDiscountEntity marketPayDiscountEntity) throws IOException {
+
+        BigDecimal payAmount = marketPayDiscountEntity == null ? totalAmount : marketPayDiscountEntity.getPayPrice();
+
         // 封装请求
         PrepayRequest prepayRequest = new PrepayRequest();
         prepayRequest.setMchId(mchId);
         prepayRequest.setOutTradeNo(orderId);
-        prepayRequest.setTotalFee(totalAmount.toString());
+        prepayRequest.setTotalFee(payAmount.toString());
         prepayRequest.setBody(productName);
         prepayRequest.setNotifyUrl(notifyUrl);
         log.info("请求参数:{}", JSON.toJSONString(prepayRequest));
@@ -68,6 +83,11 @@ public class OrderServiceImpl extends AbstractOrderService {
         payOrderEntity.setOrderId(orderId);
         payOrderEntity.setOrderStatus(OrderStatusVO.PAY_WAIT);
         payOrderEntity.setPayUrl(qrcodeUrl);
+
+        // 营销信息
+        payOrderEntity.setMarketType(null == marketPayDiscountEntity ? MarketTypeVO.NO_MARKET.getCode() : MarketTypeVO.GROUP_BUY_MARKET.getCode());
+        payOrderEntity.setMarketDeductionAmount(null == marketPayDiscountEntity ? BigDecimal.ZERO : marketPayDiscountEntity.getDeductionPrice());
+        payOrderEntity.setPayAmount(payAmount);
 
         // 更新
         orderRepository.updateOrderPayInfo(payOrderEntity);

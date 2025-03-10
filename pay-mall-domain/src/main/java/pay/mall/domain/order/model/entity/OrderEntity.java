@@ -15,19 +15,55 @@ import java.util.Date;
 @NoArgsConstructor
 public class OrderEntity {
 
+    /**
+     * 商品ID
+     */
     private String productId;
 
+    /**
+     * 商品名称
+     */
     private String productName;
 
+    /**
+     * 订单ID
+     */
     private String orderId;
 
+    /**
+     * 订单创建时间
+     */
     private Date orderTime;
 
+    /**
+     * 订单总价格
+     */
     private BigDecimal totalAmount;
 
+    /**
+     * 订单状态
+     */
     private OrderStatusVO orderStatusVO;
 
+    /**
+     * 支付地址
+     */
     private String payUrl;
+
+    /**
+     * 营销类型：0 无营销、1 拼团营销
+     */
+    private Integer marketType;
+
+    /**
+     * 优惠金额
+     */
+    private BigDecimal marketDeductionAmount;
+
+    /**
+     * 支付金额
+     */
+    private BigDecimal payAmount;
 
 
 }

@@ -47,10 +47,12 @@ public class OrderNoPayNotifyJob {
                 orderRequest.setSign(orderRequest.createSign(partnerKey));
                 OrderResponse order = nativePayServiceImpl.getOrder(orderRequest);
                 Long code = order.getCode();
-                Integer payStatus = order.getData().getPayStatus();
-                // 订单状态为1 - 已支付，更新数据库订单状态为支付成功
-                if (code == 0 && payStatus == 1) {
-                    orderService.changeOrderPaySuccess(orderId);
+                if (order.getData() != null) {
+                    Integer payStatus = order.getData().getPayStatus();
+                    // 订单状态为1 - 已支付，更新数据库订单状态为支付成功
+                    if (code == 0 && payStatus == 1) {
+                        orderService.changeOrderPaySuccess(orderId);
+                    }
                 }
             }
         } catch (Exception e) {

@@ -16,9 +16,9 @@ public class ProductRPC {
     public ProductDTO queryProductByProductId(String productId){
         ProductDTO productVO = new ProductDTO();
         productVO.setProductId(productId);
-        productVO.setProductName("脆生生口味薯条");
-        productVO.setProductDesc("原切薯条休闲解馋小零食");
-        productVO.setPrice(new BigDecimal("1.68"));
+        productVO.setProductName("《手写MyBatis：渐进式源码实践》");
+        productVO.setProductDesc("暂无");
+        productVO.setPrice(new BigDecimal("100.00"));
         return productVO;
     }
 
