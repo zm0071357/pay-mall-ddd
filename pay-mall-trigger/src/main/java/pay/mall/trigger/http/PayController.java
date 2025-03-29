@@ -16,7 +16,9 @@ import pay.mall.domain.order.service.OrderService;
 import pay.mall.types.enums.ResponseCode;
 
 import javax.annotation.Resource;
-import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 @Slf4j
 @RestController
@@ -41,6 +43,7 @@ public class PayController implements PayService {
                     .productId(productId)
                     .teamId(createPayRequestDTO.getTeamId())
                     .marketTypeVO(MarketTypeVO.valueOf(marketType))
+                    .activityId(createPayRequestDTO.getActivityId())
                     .build());
             log.info("商品下单，根据商品ID创建支付单完成 userId:{} productId:{} orderId:{}", userId, productId, payOrderEntity.getOrderId());
             return Response.<String>builder()
@@ -65,7 +68,9 @@ public class PayController implements PayService {
                     code, timestamp, mch_id, order_no, out_trade_no, pay_no, total_fee,
                     sign, pay_channel, trade_type, success_time, attach, openid);
             // 订单支付成功
-            orderService.changeOrderPaySuccess(order_no, Date.valueOf(timestamp));
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date successTime = format.parse(success_time);
+            orderService.changeOrderPaySuccess(order_no, successTime);
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }catch (Exception e) {
             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
@@ -98,6 +103,5 @@ public class PayController implements PayService {
             return "error";
         }
     }
-
 
 }

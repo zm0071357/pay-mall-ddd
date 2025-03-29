@@ -30,4 +30,25 @@ public interface OrderService {
      * @param outTradeNoList
      */
     void changeOrderMarketSettlement(List<String> outTradeNoList);
+
+
+    /**
+     * 查询没有回调的订单集合
+     * @return
+     */
+    List<String> queryNoPayNotifyOrder();
+
+    /**
+     * 查询超时的订单集合
+     * @return
+     */
+    List<String> queryTimeoutCloseOrderList();
+
+
+    /**
+     * 关单
+     * @param orderId
+     * @return
+     */
+    boolean changeOrderClose(String orderId);
 }

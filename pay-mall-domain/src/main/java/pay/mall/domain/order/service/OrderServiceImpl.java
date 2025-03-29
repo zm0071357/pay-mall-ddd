@@ -122,4 +122,19 @@ public class OrderServiceImpl extends AbstractOrderService {
     public void changeOrderMarketSettlement(List<String> outTradeNoList) {
         orderRepository.changeOrderMarketSettlement(outTradeNoList);
     }
+
+    @Override
+    public List<String> queryNoPayNotifyOrder() {
+        return orderRepository.queryNoPayNotifyOrder();
+    }
+
+    @Override
+    public List<String> queryTimeoutCloseOrderList() {
+        return orderRepository.queryTimeoutCloseOrderList();
+    }
+
+    @Override
+    public boolean changeOrderClose(String orderId) {
+        return orderRepository.changeOrderClose(orderId);
+    }
 }

@@ -25,5 +25,5 @@ public interface GroupBuyMarketService {
      * @return
      */
     @POST("/api/gbm/trade/settlement_market_pay_order")
-    Call<Response<SettlementMarketPayOrderResponseDTO>> settlementMarketPayOrder(SettlementMarketPayOrderRequestDTO requestDTO);
+    Call<Response<SettlementMarketPayOrderResponseDTO>> settlementMarketPayOrder(@Body SettlementMarketPayOrderRequestDTO requestDTO);
 }

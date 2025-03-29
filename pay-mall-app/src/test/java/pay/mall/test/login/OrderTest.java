@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import pay.mall.domain.order.model.entity.PayOrderEntity;
 import pay.mall.domain.order.model.entity.ShopCartEntity;
+import pay.mall.domain.order.model.valobj.MarketTypeVO;
 import pay.mall.domain.order.service.OrderService;
 
 import javax.annotation.Resource;
@@ -29,8 +30,12 @@ public class OrderTest {
     @Test
     public void test_createOrder() throws Exception {
         ShopCartEntity shopCartEntity = new ShopCartEntity();
-        shopCartEntity.setUserId("zm0031357");
-        shopCartEntity.setProductId("10001");
+        shopCartEntity.setUserId("lzm0071357");
+        shopCartEntity.setProductId("9890001");
+        shopCartEntity.setTeamId(null);
+        shopCartEntity.setActivityId(100123L);
+        shopCartEntity.setMarketTypeVO(MarketTypeVO.GROUP_BUY_MARKET);
+
         PayOrderEntity payOrderEntity = orderService.createOrder(shopCartEntity);
         log.info("请求参数:{}", JSON.toJSONString(shopCartEntity));
         log.info("测试结果:{}", JSON.toJSONString(payOrderEntity));

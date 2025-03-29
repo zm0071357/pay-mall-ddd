@@ -15,6 +15,16 @@ import lombok.NoArgsConstructor;
 public class SettlementMarketPayOrderResponseDTO {
 
     /**
+     * 渠道
+     */
+    private String source;
+
+    /**
+     * 来源
+     */
+    private String channel;
+
+    /**
      * 用户ID
      */
     private String userId;

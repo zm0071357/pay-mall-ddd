@@ -105,7 +105,8 @@ public class ProductPortImpl implements ProductPort {
                 throw new AppException(response.getCode(), response.getInfo());
             }
         } catch (Exception e) {
-            log.error("营销结算失败{}", userId, e);
+            log.info("营销结算失败{} requestDTO:{}", userId, JSON.toJSONString(requestDTO), e);
+
         }
 
     }
