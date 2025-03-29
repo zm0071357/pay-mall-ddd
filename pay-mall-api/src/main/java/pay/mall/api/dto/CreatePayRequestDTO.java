@@ -29,7 +29,7 @@ public class CreatePayRequestDTO {
     private Long activityId;
 
     /**
-     * 营销类型 - 0无营销
+     * 营销类型 - 0 无营销、1 拼团营销
      */
     private Integer marketType = 0;
 

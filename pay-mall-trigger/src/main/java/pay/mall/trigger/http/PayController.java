@@ -9,6 +9,7 @@ import pay.mall.api.dto.CreatePayRequestDTO;
 import pay.mall.api.response.Response;
 import pay.mall.domain.order.model.entity.PayOrderEntity;
 import pay.mall.domain.order.model.entity.ShopCartEntity;
+import pay.mall.domain.order.model.valobj.MarketTypeVO;
 import pay.mall.domain.order.service.OrderService;
 import pay.mall.types.enums.ResponseCode;
 
@@ -30,9 +31,13 @@ public class PayController implements PayService {
             log.info("商品下单，根据商品ID创建支付单开始 userId:{} productId:{}", createPayRequestDTO.getUserId(), createPayRequestDTO.getProductId());
             String userId = createPayRequestDTO.getUserId();
             String productId = createPayRequestDTO.getProductId();
+            Integer marketType = createPayRequestDTO.getMarketType();
             PayOrderEntity payOrderEntity = orderService.createOrder(ShopCartEntity.builder()
                     .userId(userId)
+                    .activityId(createPayRequestDTO.getActivityId())
                     .productId(productId)
+                    .teamId(createPayRequestDTO.getTeamId())
+                    .marketTypeVO(MarketTypeVO.valueOf(marketType))
                     .build());
             log.info("商品下单，根据商品ID创建支付单完成 userId:{} productId:{} orderId:{}", userId, productId, payOrderEntity.getOrderId());
             return Response.<String>builder()
@@ -56,10 +61,6 @@ public class PayController implements PayService {
             log.info("支付回调，请求参数：{} {} {} {} {} {} {} {} {} {} {} {} {}",
                     code, timestamp, mch_id, order_no, out_trade_no, pay_no, total_fee,
                     sign, pay_channel, trade_type, success_time, attach, openid);
-            // 支付完成
-            if (code.equals("0") && success_time != null) {
-                orderService.changeOrderPaySuccess(out_trade_no);
-            }
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }catch (Exception e) {
             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);

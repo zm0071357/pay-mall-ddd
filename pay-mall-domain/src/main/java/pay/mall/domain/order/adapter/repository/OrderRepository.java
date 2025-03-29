@@ -5,6 +5,7 @@ import pay.mall.domain.order.model.entity.OrderEntity;
 import pay.mall.domain.order.model.entity.PayOrderEntity;
 import pay.mall.domain.order.model.entity.ShopCartEntity;
 
+import java.util.Date;
 import java.util.List;
 
 public interface OrderRepository {
@@ -31,8 +32,9 @@ public interface OrderRepository {
     /**
      * 支付完成
      * @param orderId
+     * @param orderTime
      */
-    void changeOrderPaySuccess(String orderId);
+    void changeOrderPaySuccess(String orderId, Date orderTime);
 
     /**
      * 查询没有回调的订单
@@ -52,4 +54,23 @@ public interface OrderRepository {
      * @return
      */
     boolean changeOrderClose(String orderId);
+
+    /**
+     * 根据订单ID查询订单
+     * @param orderId
+     * @return
+     */
+    OrderEntity queryOrderByOrderId(String orderId);
+
+    /**
+     * 拼团 - 支付完成
+     * @param orderId
+     */
+    void changeMarketOrderPaySuccess(String orderId);
+
+    /**
+     * 拼团完成
+     * @param outTradeNoList
+     */
+    void changeOrderMarketSettlement(List<String> outTradeNoList);
 }

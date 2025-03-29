@@ -1,6 +1,8 @@
 package pay.mall.infrastructure.dao;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import pay.mall.domain.order.model.entity.OrderEntity;
 import pay.mall.infrastructure.dao.po.PayOrder;
 
 import java.util.List;
@@ -51,4 +53,20 @@ public interface PayOrderDao {
      * @return
      */
     boolean changeOrderClose(String orderId);
+
+    /**
+     * 根据订单ID查询订单
+     * @param orderId
+     * @return
+     */
+    PayOrder queryOrderByOrderId(String orderId);
+
+    /**
+     * 拼团完成
+     * @param outTradeNoList
+     */
+    void changeOrderMarketSettlement(@Param("outTradeNoList") List<String> outTradeNoList);
+
+
+    void changeOrderDealDone(String tradeNo);
 }

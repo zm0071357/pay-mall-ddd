@@ -1,5 +1,6 @@
 package pay.mall.domain.order.service;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import pay.mall.domain.order.adapter.port.ProductPort;
 import pay.mall.domain.order.adapter.repository.OrderRepository;
@@ -30,17 +31,17 @@ public abstract class AbstractOrderService implements OrderService {
 
     @Override
     public PayOrderEntity createOrder(ShopCartEntity shopCartEntity) throws Exception {
-        // 查询当前用户是否存在掉单和未支付订单
+        // 查询当前用户是否存在未支付订单
         OrderEntity unpaidOrderEntity = orderRepository.queryUnPayOrder(shopCartEntity);
         if (null != unpaidOrderEntity && OrderStatusVO.PAY_WAIT.equals(unpaidOrderEntity.getOrderStatusVO())) {
-            log.info("创建订单-存在，已存在未支付订单。userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
+            log.info("创建订单-已存在未支付订单。userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
             return PayOrderEntity.builder()
                     .orderId(unpaidOrderEntity.getOrderId())
                     .payUrl(unpaidOrderEntity.getPayUrl())
                     .build();
+        // 当前用户是否存在掉单
         } else if (null != unpaidOrderEntity && OrderStatusVO.CREATE.equals(unpaidOrderEntity.getOrderStatusVO())) {
-            // 支付
-            log.info("创建订单-存在，存在未创建支付单订单，创建支付单开始 userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
+            log.info("创建订单-存在未创建支付单的订单，创建支付单 userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
             Integer marketType = unpaidOrderEntity.getMarketType();
             BigDecimal marketDeductionAmount = unpaidOrderEntity.getMarketDeductionAmount();
             PayOrderEntity payOrderEntity = null;
@@ -58,12 +59,17 @@ public abstract class AbstractOrderService implements OrderService {
                         unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getTotalAmount(), marketPayDiscountEntity);
             // 锁单成功
             } else if (MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(marketType)) {
-                log.info("锁单成功");
-                payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(),
-                        unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getPayAmount());
+                log.info("拼团营销-重新营销锁单 userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
+                MarketPayDiscountEntity marketPayDiscountEntity = this.lockMarketPayOrder(shopCartEntity.getUserId(),
+                        shopCartEntity.getTeamId(),
+                        shopCartEntity.getActivityId(),
+                        shopCartEntity.getProductId(),
+                        unpaidOrderEntity.getOrderId());
+                payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getProductName(),
+                        unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getPayAmount(), marketPayDiscountEntity);
             // 未进行营销
             } else {
-                log.info("未进行营销");
+                log.info("未进行营销 userId:{} productId:{} orderId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId(), unpaidOrderEntity.getOrderId());
                 payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(), shopCartEntity.getProductId(),
                         unpaidOrderEntity.getProductName(), unpaidOrderEntity.getOrderId(), unpaidOrderEntity.getTotalAmount());
             }
@@ -74,7 +80,7 @@ public abstract class AbstractOrderService implements OrderService {
         }
 
         // 正常创建订单
-        log.info("创建订单-不存在，正常创建订单。创建订单开始 userId:{} productId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId());
+        log.info("创建订单-不存在，正常创建订单 userId:{} productId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId());
         // 查询商品信息
         ProductEntity productEntity = productPort.queryProductByProductId(shopCartEntity.getProductId());
         OrderEntity orderEntity = CreateOrderAggregate.buildOrderEntity(productEntity.getProductId(), productEntity.getProductName());
@@ -83,21 +89,19 @@ public abstract class AbstractOrderService implements OrderService {
                 .productEntity(productEntity)
                 .orderEntity(orderEntity)
                 .build();
-
-        // 保存订单
+        // 保存未做营销的普通订单
         this.doSaveOrder(orderAggregate);
-
         // 营销锁单
         MarketPayDiscountEntity marketPayDiscountEntity = null;
         if (MarketTypeVO.GROUP_BUY_MARKET.equals(shopCartEntity.getMarketTypeVO())) {
-            log.info("进行营销锁单");
+            log.info("进行营销锁单 userId:{} productId:{}", shopCartEntity.getUserId(), shopCartEntity.getProductId());
             marketPayDiscountEntity = this.lockMarketPayOrder(shopCartEntity.getUserId(),
                     shopCartEntity.getTeamId(),
                     shopCartEntity.getActivityId(),
                     shopCartEntity.getProductId(),
                     orderEntity.getOrderId());
+            log.info("营销结果:{}", JSON.toJSONString(marketPayDiscountEntity));
         }
-
         // 创建支付单
         PayOrderEntity payOrderEntity = doPrepayOrder(shopCartEntity.getUserId(),
                 shopCartEntity.getProductId(),

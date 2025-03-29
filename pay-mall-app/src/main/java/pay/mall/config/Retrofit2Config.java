@@ -8,6 +8,9 @@ import pay.mall.infrastructure.gateway.GroupBuyMarketService;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
+/**
+ * Retrofit 配置类
+ */
 @Slf4j
 @Configuration
 public class Retrofit2Config {
@@ -15,6 +18,10 @@ public class Retrofit2Config {
     @Value("${app.config.group-buy-market.api-url}")
     private String groupBuyMarketApiUrl;
 
+    /**
+     * Retrofit 客户端
+     * @return
+     */
     @Bean
     public GroupBuyMarketService groupBuyMarketService() {
         Retrofit retrofit = new Retrofit.Builder()

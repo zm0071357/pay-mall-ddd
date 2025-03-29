@@ -3,6 +3,7 @@ package pay.mall.domain.order.adapter.port;
 import pay.mall.domain.order.model.entity.MarketPayDiscountEntity;
 import pay.mall.domain.order.model.entity.ProductEntity;
 
+
 /**
  * rpc调用
  * 一般商品和支付会抽成两个微服务
@@ -18,7 +19,7 @@ public interface ProductPort {
     ProductEntity queryProductByProductId(String productId);
 
     /**
-     * 锁单
+     * 营销锁单
      * @param userId
      * @param teamId
      * @param activityId
@@ -27,4 +28,5 @@ public interface ProductPort {
      * @return
      */
     MarketPayDiscountEntity lockMarketPayOrder(String userId, String teamId, Long activityId, String productId, String orderId);
+
 }

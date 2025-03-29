@@ -16,6 +16,11 @@ import java.util.Date;
 public class OrderEntity {
 
     /**
+     * 用户ID
+     */
+    private String userId;
+
+    /**
      * 商品ID
      */
     private String productId;

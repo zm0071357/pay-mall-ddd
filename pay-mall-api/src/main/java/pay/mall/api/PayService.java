@@ -1,7 +1,6 @@
 package pay.mall.api;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 import pay.mall.api.dto.CreatePayRequestDTO;
 import pay.mall.api.response.Response;
 
@@ -18,7 +17,7 @@ public interface PayService {
     Response<String> createPayOrder(CreatePayRequestDTO createPayRequestDTO);
 
     /**
-     * 支付回调通知用户
+     * 蓝兔支付 - 支付回调通知用户
      * 支付完成后，蓝兔支付会把相关支付结果和用户信息发送给商户
      * @param code 支付结果，枚举值：0：成功 1：失败
      * @param timestamp 时间戳
@@ -51,7 +50,7 @@ public interface PayService {
             String openid);
 
     /**
-     * 退款回调通知
+     * 蓝兔支付 - 退款回调通知
      * @param code 支付结果，枚举值：0：成功 1：失败
      * @param timestamp 时间戳
      * @param mch_id 商户号
@@ -79,4 +78,5 @@ public interface PayService {
             String refund_fee,
             String sign,
             String success_time);
+
 }

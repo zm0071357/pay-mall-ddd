@@ -19,6 +19,7 @@ import pay.mall.types.event.BaseEvent;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -97,7 +98,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public void changeOrderPaySuccess(String orderId) {
+    public void changeOrderPaySuccess(String orderId, Date orderTime) {
         PayOrder payOrderReq = new PayOrder();
         payOrderReq.setOrderId(orderId);
         payOrderReq.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
@@ -123,5 +124,46 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public boolean changeOrderClose(String orderId) {
         return payOrderDao.changeOrderClose(orderId);
+    }
+
+    @Override
+    public OrderEntity queryOrderByOrderId(String orderId) {
+        PayOrder payOrder = payOrderDao.queryOrderByOrderId(orderId);
+        if (payOrder == null) {
+            return null;
+        }
+        return OrderEntity.builder()
+                .userId(payOrder.getUserId())
+                .productId(payOrder.getProductId())
+                .productName(payOrder.getProductName())
+                .orderId(payOrder.getOrderId())
+                .orderTime(payOrder.getOrderTime())
+                .totalAmount(payOrder.getTotalAmount())
+                .payUrl(payOrder.getPayUrl())
+                .marketType(payOrder.getMarketType())
+                .marketDeductionAmount(payOrder.getMarketDeductionAmount())
+                .payAmount(payOrder.getPayAmount())
+                .build();
+
+    }
+
+    @Override
+    public void changeMarketOrderPaySuccess(String orderId) {
+        PayOrder payOrderReq = new PayOrder();
+        payOrderReq.setOrderId(orderId);
+        payOrderReq.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
+        // 更新数据库中订单状态 - 支付成功
+        payOrderDao.changeOrderPaySuccess(payOrderReq);
+    }
+
+    @Override
+    public void changeOrderMarketSettlement(List<String> outTradeNoList) {
+        payOrderDao.changeOrderMarketSettlement(outTradeNoList);
+        for (String outTradeNo : outTradeNoList) {
+            // 发送MQ信息
+            BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(PaySuccessMessageEvent.PaySuccessMessage.builder().tradeNo(outTradeNo).build());
+            PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
+            eventBus.post(JSON.toJSONString(paySuccessMessage));
+        }
     }
 }

@@ -16,4 +16,5 @@ public interface GroupBuyMarketService {
      */
     @POST("/api/gbm/trade/lock_market_pay_order")
     Call<Response<LockMarketPayOrderResponseDTO>> lockMarketPayOrder(@Body LockMarketPayOrderRequestDTO requestDTO);
+
 }

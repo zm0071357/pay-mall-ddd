@@ -9,12 +9,13 @@ import pay.mall.domain.order.model.entity.MarketPayDiscountEntity;
 import pay.mall.domain.order.model.entity.ProductEntity;
 import pay.mall.infrastructure.gateway.GroupBuyMarketService;
 import pay.mall.infrastructure.gateway.ProductRPC;
-import pay.mall.infrastructure.gateway.dto.LockMarketPayOrderRequestDTO;
-import pay.mall.infrastructure.gateway.dto.LockMarketPayOrderResponseDTO;
-import pay.mall.infrastructure.gateway.dto.ProductDTO;
+import pay.mall.infrastructure.gateway.dto.*;
 import pay.mall.infrastructure.gateway.response.Response;
 import pay.mall.types.exception.AppException;
 import retrofit2.Call;
+
+import java.io.IOException;
+import java.util.Date;
 
 @Component
 @Slf4j
@@ -23,7 +24,7 @@ public class ProductPortImpl implements ProductPort {
     @Value("${app.config.group-buy-market.source}")
     private String source;
     @Value("${app.config.group-buy-market.channel}")
-    private String chanel;
+    private String channel;
     @Value("${app.config.group-buy-market.notify-url}")
     private String notifyUrl;
 
@@ -56,26 +57,22 @@ public class ProductPortImpl implements ProductPort {
         requestDTO.setGoodsId(productId);
         requestDTO.setActivityId(activityId);
         requestDTO.setSource(source);
-        requestDTO.setChannel(chanel);
+        requestDTO.setChannel(channel);
         requestDTO.setOutTradeNo(orderId);
         requestDTO.setNotifyUrl(notifyUrl);
 
         try {
             // 营销锁单
             Call<Response<LockMarketPayOrderResponseDTO>> call = groupBuyMarketService.lockMarketPayOrder(requestDTO);
-
             // 获取结果
             Response<LockMarketPayOrderResponseDTO> response = call.execute().body();
-            log.info("营销锁单{} requestDTO:{} responseDTO:{}", userId, JSON.toJSONString(requestDTO), JSON.toJSONString(response));
+            log.info("营销锁单 userId:{} requestDTO:{} responseDTO:{}", userId, JSON.toJSONString(requestDTO), JSON.toJSONString(response));
             if (null == response) return null;
-
             // 异常判断
             if (!"0000".equals(response.getCode())) {
                 throw new AppException(response.getCode(), response.getInfo());
             }
-
             LockMarketPayOrderResponseDTO responseDTO = response.getData();
-
             // 获取拼团优惠
             return MarketPayDiscountEntity.builder()
                     .originalPrice(responseDTO.getOriginalPrice())
@@ -83,7 +80,7 @@ public class ProductPortImpl implements ProductPort {
                     .payPrice(responseDTO.getPayPrice())
                     .build();
         } catch (Exception e) {
-            log.error("营销锁单失败{}", userId, e);
+            log.info("营销锁单 userId:{} requestDTO:{} 失败", userId, JSON.toJSONString(requestDTO), e);
             return null;
         }
     }

@@ -15,6 +15,7 @@ import pay.mall.domain.order.adapter.port.ProductPort;
 import pay.mall.domain.order.adapter.repository.OrderRepository;
 import pay.mall.domain.order.model.aggregate.CreateOrderAggregate;
 import pay.mall.domain.order.model.entity.MarketPayDiscountEntity;
+import pay.mall.domain.order.model.entity.OrderEntity;
 import pay.mall.domain.order.model.entity.PayOrderEntity;
 import pay.mall.domain.order.model.valobj.MarketTypeVO;
 import pay.mall.domain.order.model.valobj.OrderStatusVO;
@@ -22,6 +23,7 @@ import pay.mall.domain.order.model.valobj.OrderStatusVO;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -61,7 +63,7 @@ public class OrderServiceImpl extends AbstractOrderService {
 
     @Override
     protected PayOrderEntity doPrepayOrder(String userId, String productId, String productName, String orderId, BigDecimal totalAmount, MarketPayDiscountEntity marketPayDiscountEntity) throws IOException {
-
+        // 最终支付金额
         BigDecimal payAmount = marketPayDiscountEntity == null ? totalAmount : marketPayDiscountEntity.getPayPrice();
 
         // 封装请求
@@ -95,23 +97,4 @@ public class OrderServiceImpl extends AbstractOrderService {
         return payOrderEntity;
     }
 
-    @Override
-    public void changeOrderPaySuccess(String orderId) {
-        orderRepository.changeOrderPaySuccess(orderId);
-    }
-
-    @Override
-    public List<String> queryNoPayNotifyOrder() {
-        return orderRepository.queryNoPayNotifyOrder();
-    }
-
-    @Override
-    public List<String> queryTimeoutCloseOrderList() {
-        return orderRepository.queryTimeoutCloseOrderList();
-    }
-
-    @Override
-    public boolean changeOrderClose(String orderId) {
-        return orderRepository.changeOrderClose(orderId);
-    }
 }
