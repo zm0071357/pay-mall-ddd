@@ -81,7 +81,7 @@
     </update>
 
     <update id="changeOrderMarketSettlement" parameterType="java.util.List">
-        update pay_order set status = 'MARKET', update_time = now()
+        update pay_order set status = 'MARKET_DEAL_DONE', update_time = now()
         where order_id in
         <foreach item="orderId" collection="outTradeNoList" open="(" separator="," close=")">
             #{orderId}

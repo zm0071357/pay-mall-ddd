@@ -15,6 +15,7 @@ public enum OrderStatusVO {
     PAY_SUCCESS("PAY_SUCCESS", "支付成功 - 接收到支付回调消息"),
     DEAL_DONE("DEAL_DONE", "交易完成 - 商品发货完成"),
     CLOSE("CLOSE", "超时关单 - 超时未支付"),
+    MARKET_DEAL_DONE("MARKET", "营销结算 - 拼团组队完成"),
     ;
 
     private final String code;

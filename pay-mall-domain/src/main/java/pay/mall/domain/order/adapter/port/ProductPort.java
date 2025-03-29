@@ -3,6 +3,8 @@ package pay.mall.domain.order.adapter.port;
 import pay.mall.domain.order.model.entity.MarketPayDiscountEntity;
 import pay.mall.domain.order.model.entity.ProductEntity;
 
+import java.util.Date;
+
 
 /**
  * rpc调用
@@ -29,4 +31,11 @@ public interface ProductPort {
      */
     MarketPayDiscountEntity lockMarketPayOrder(String userId, String teamId, Long activityId, String productId, String orderId);
 
+    /**
+     * 营销结算
+     * @param userId
+     * @param orderId
+     * @param orderTime
+     */
+    void settlementMarketPayOrder(String userId, String orderId, Date orderTime);
 }

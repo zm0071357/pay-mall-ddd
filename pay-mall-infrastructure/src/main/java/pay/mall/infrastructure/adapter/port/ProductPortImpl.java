@@ -85,4 +85,29 @@ public class ProductPortImpl implements ProductPort {
         }
     }
 
+    @Override
+    public void settlementMarketPayOrder(String userId, String orderId, Date orderTime) {
+        SettlementMarketPayOrderRequestDTO requestDTO = new SettlementMarketPayOrderRequestDTO();
+        requestDTO.setSource(source);
+        requestDTO.setChannel(channel);
+        requestDTO.setUserId(userId);
+        requestDTO.setOutTradeNo(orderId);
+        requestDTO.setOutTradeTime(orderTime);
+        // 营销结算
+        try {
+            Call<Response<SettlementMarketPayOrderResponseDTO>> call = groupBuyMarketService.settlementMarketPayOrder(requestDTO);
+            // 获取结果
+            Response<SettlementMarketPayOrderResponseDTO> response = call.execute().body();
+            log.info("营销结算{} requestDTO:{} responseDTO:{}", userId, JSON.toJSONString(requestDTO), JSON.toJSONString(response));
+            if (null == response) return;
+            // 异常判断
+            if (!"0000".equals(response.getCode())) {
+                throw new AppException(response.getCode(), response.getInfo());
+            }
+        } catch (Exception e) {
+            log.error("营销结算失败{}", userId, e);
+        }
+
+    }
+
 }

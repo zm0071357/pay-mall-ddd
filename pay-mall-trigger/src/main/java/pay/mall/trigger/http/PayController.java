@@ -1,11 +1,13 @@
 package pay.mall.trigger.http;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pay.mall.api.PayService;
 import pay.mall.api.dto.CreatePayRequestDTO;
+import pay.mall.api.dto.NotifyRequestDTO;
 import pay.mall.api.response.Response;
 import pay.mall.domain.order.model.entity.PayOrderEntity;
 import pay.mall.domain.order.model.entity.ShopCartEntity;
@@ -14,6 +16,7 @@ import pay.mall.domain.order.service.OrderService;
 import pay.mall.types.enums.ResponseCode;
 
 import javax.annotation.Resource;
+import java.sql.Date;
 
 @Slf4j
 @RestController
@@ -61,6 +64,8 @@ public class PayController implements PayService {
             log.info("支付回调，请求参数：{} {} {} {} {} {} {} {} {} {} {} {} {}",
                     code, timestamp, mch_id, order_no, out_trade_no, pay_no, total_fee,
                     sign, pay_channel, trade_type, success_time, attach, openid);
+            // 订单支付成功
+            orderService.changeOrderPaySuccess(order_no, Date.valueOf(timestamp));
             return new ResponseEntity<>("SUCCESS", HttpStatus.OK);
         }catch (Exception e) {
             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
@@ -79,5 +84,20 @@ public class PayController implements PayService {
             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
         }
     }
+
+    @PostMapping("/group_buy_notify")
+    @Override
+    public String groupBuyNotify(NotifyRequestDTO requestDTO) {
+        log.info("拼团回调，组队完成，结算开始 {}", JSON.toJSONString(requestDTO));
+        try {
+            // 营销结算
+            orderService.changeOrderMarketSettlement(requestDTO.getOutTradeNoList());
+            return "success";
+        } catch (Exception e) {
+            log.info("拼团回调，组队完成，结算失败 {}", JSON.toJSONString(requestDTO));
+            return "error";
+        }
+    }
+
 
 }

@@ -97,4 +97,29 @@ public class OrderServiceImpl extends AbstractOrderService {
         return payOrderEntity;
     }
 
+    @Override
+    public void changeOrderPaySuccess(String orderId, Date payTime) {
+        // 查询订单
+        OrderEntity orderEntity = orderRepository.queryOrderByOrderId(orderId);
+        if (orderEntity == null) {
+            return;
+        }
+        // 拼团营销
+        if (MarketTypeVO.GROUP_BUY_MARKET.getCode().equals(orderEntity.getMarketType())) {
+            // 更新订单状态为支付成功
+            orderRepository.changeMarketOrderPaySuccess(orderId);
+            // 营销结算
+            productPort.settlementMarketPayOrder(orderEntity.getUserId(), orderId, payTime);
+        }
+        // 无营销
+        else {
+            // 更新订单状态为支付成功
+            orderRepository.changeOrderPaySuccess(orderId, payTime);
+        }
+    }
+
+    @Override
+    public void changeOrderMarketSettlement(List<String> outTradeNoList) {
+        orderRepository.changeOrderMarketSettlement(outTradeNoList);
+    }
 }

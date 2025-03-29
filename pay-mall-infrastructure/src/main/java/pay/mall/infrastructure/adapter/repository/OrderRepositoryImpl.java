@@ -104,11 +104,6 @@ public class OrderRepositoryImpl implements OrderRepository {
         payOrderReq.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
         // 更新数据库中订单状态 - 支付成功
         payOrderDao.changeOrderPaySuccess(payOrderReq);
-
-        // 发送MQ信息
-        BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(PaySuccessMessageEvent.PaySuccessMessage.builder().tradeNo(orderId).build());
-        PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
-        eventBus.post(JSON.toJSONString(paySuccessMessage));
     }
 
     @Override
@@ -159,11 +154,6 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public void changeOrderMarketSettlement(List<String> outTradeNoList) {
         payOrderDao.changeOrderMarketSettlement(outTradeNoList);
-        for (String outTradeNo : outTradeNoList) {
-            // 发送MQ信息
-            BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(PaySuccessMessageEvent.PaySuccessMessage.builder().tradeNo(outTradeNo).build());
-            PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
-            eventBus.post(JSON.toJSONString(paySuccessMessage));
-        }
     }
+
 }

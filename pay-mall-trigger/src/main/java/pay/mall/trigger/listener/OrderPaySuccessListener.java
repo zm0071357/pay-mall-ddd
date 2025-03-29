@@ -22,13 +22,9 @@ public class OrderPaySuccessListener {
     @Subscribe
     public void handleEvent(String paySuccessMessageJSON) {
         log.info("收到支付成功消息 {}", paySuccessMessageJSON);
-
         PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = JSON.parseObject(paySuccessMessageJSON, PaySuccessMessageEvent.PaySuccessMessage.class);
-
         log.info("商品已在打包发货中，单号:{}", paySuccessMessage.getTradeNo());
         goodsService.changeOrderDealDone(paySuccessMessage.getTradeNo());
     }
-
-
 
 }

@@ -17,5 +17,17 @@ public interface OrderService {
      */
     PayOrderEntity createOrder(ShopCartEntity shopCartEntity) throws Exception;
 
+    /**
+     * 订单支付成功
+     * @param orderId
+     * @param payTime
+     */
+    void changeOrderPaySuccess(String orderId, Date payTime);
 
+
+    /**
+     * 拼团回调 - 通知商城系统已经结算完成，进行发货等操作
+     * @param outTradeNoList
+     */
+    void changeOrderMarketSettlement(List<String> outTradeNoList);
 }

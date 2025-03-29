@@ -2,6 +2,7 @@ package pay.mall.api;
 
 import org.springframework.http.ResponseEntity;
 import pay.mall.api.dto.CreatePayRequestDTO;
+import pay.mall.api.dto.NotifyRequestDTO;
 import pay.mall.api.response.Response;
 
 /**
@@ -78,5 +79,12 @@ public interface PayService {
             String refund_fee,
             String sign,
             String success_time);
+
+    /**
+     * 拼团结算回调
+     * @param requestDTO
+     * @return
+     */
+    String groupBuyNotify(NotifyRequestDTO requestDTO);
 
 }
