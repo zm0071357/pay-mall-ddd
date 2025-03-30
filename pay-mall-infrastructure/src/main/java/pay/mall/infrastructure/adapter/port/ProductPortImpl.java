@@ -59,7 +59,8 @@ public class ProductPortImpl implements ProductPort {
         requestDTO.setSource(source);
         requestDTO.setChannel(channel);
         requestDTO.setOutTradeNo(orderId);
-        requestDTO.setNotifyUrl(notifyUrl);
+        //requestDTO.setNotifyUrl(notifyUrl);
+        requestDTO.setNotifyMQ();
 
         try {
             // 营销锁单

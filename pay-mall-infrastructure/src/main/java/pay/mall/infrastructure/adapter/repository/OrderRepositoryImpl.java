@@ -15,6 +15,7 @@ import pay.mall.domain.order.model.valobj.MarketTypeVO;
 import pay.mall.domain.order.model.valobj.OrderStatusVO;
 import pay.mall.infrastructure.dao.PayOrderDao;
 import pay.mall.infrastructure.dao.po.PayOrder;
+import pay.mall.infrastructure.event.EventPublisher;
 import pay.mall.types.event.BaseEvent;
 
 import javax.annotation.Resource;
@@ -33,7 +34,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     private PaySuccessMessageEvent paySuccessMessageEvent;
 
     @Resource
-    private EventBus eventBus;
+    private EventPublisher eventPublisher;
 
     @Override
     public void doSaveOrder(CreateOrderAggregate orderAggregate) {
@@ -104,6 +105,19 @@ public class OrderRepositoryImpl implements OrderRepository {
         payOrderReq.setStatus(OrderStatusVO.PAY_SUCCESS.getCode());
         // 更新数据库中订单状态 - 支付成功
         payOrderDao.changeOrderPaySuccess(payOrderReq);
+
+        // 不走拼团营销的直接结算发货
+        BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(
+                PaySuccessMessageEvent.PaySuccessMessage.builder()
+                        .tradeNo(orderId)
+                        .build());
+        PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
+
+        // 旧版发送消息方式
+        // eventBus.post(JSON.toJSONString(paySuccessMessage));
+
+        eventPublisher.publish(paySuccessMessageEvent.topic(), JSON.toJSONString(paySuccessMessage));
+
     }
 
     @Override
@@ -163,7 +177,8 @@ public class OrderRepositoryImpl implements OrderRepository {
                             .tradeNo(outTradeNo)
                             .build());
             PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
-            eventBus.post(JSON.toJSONString(paySuccessMessage));
+            // eventBus.post(JSON.toJSONString(paySuccessMessage));
+            eventPublisher.publish(paySuccessMessageEvent.topic(), JSON.toJSONString(paySuccessMessage));
         });
     }
 

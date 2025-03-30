@@ -24,7 +24,7 @@ public class PaySuccessMessageEvent extends BaseEvent<PaySuccessMessageEvent.Pay
 
     @Override
     public String topic() {
-        return "pay_success";
+        return "topic.order_pay_success";
     }
 
     @Data

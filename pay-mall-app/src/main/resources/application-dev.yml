@@ -42,6 +42,13 @@ spring:
       delivery-mode: persistent # 确保全局默认设置为持久化（可选）
     # 消息配置
     config:
+      # 生产者
+      producer:
+        topic_order_pay_success:
+          exchange: pay_mall_exchange
+          routing_key: topic.order_pay_success
+          queue: pay_mall_queue_2_order_pay_success
+      # 消费者
       consumer:
         # 消费 topic 主题，team_success
         topic_team_success:
@@ -51,6 +58,10 @@ spring:
           routing_key: topic.team_success
           # 消费队列 - 每个系统有自己的消费队列
           queue: pay_mall_queue_2_topic_team_success
+        topic_order_pay_success:
+          exchange: pay_mall_exchange
+          routing_key: topic.order_pay_success
+          queue: pay_mall_queue_2_order_pay_success
 
 # MyBatis 配置
 mybatis:
