@@ -153,7 +153,18 @@ public class OrderRepositoryImpl implements OrderRepository {
 
     @Override
     public void changeOrderMarketSettlement(List<String> outTradeNoList) {
+        // 更新拼团结算状态
         payOrderDao.changeOrderMarketSettlement(outTradeNoList);
+
+        // 循环成功发送消息
+        outTradeNoList.forEach(outTradeNo -> {
+            BaseEvent.EventMessage<PaySuccessMessageEvent.PaySuccessMessage> paySuccessMessageEventMessage = paySuccessMessageEvent.buildEventMessage(
+                    PaySuccessMessageEvent.PaySuccessMessage.builder()
+                            .tradeNo(outTradeNo)
+                            .build());
+            PaySuccessMessageEvent.PaySuccessMessage paySuccessMessage = paySuccessMessageEventMessage.getData();
+            eventBus.post(JSON.toJSONString(paySuccessMessage));
+        });
     }
 
 }
