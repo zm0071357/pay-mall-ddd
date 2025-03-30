@@ -171,6 +171,11 @@ body {
     font-size: 16px;
     cursor: pointer;
 }
+.action-btn::after {
+    content: attr(data-price);
+    margin-left: 5px;
+    font-weight: bold;
+}
 .buy-alone {
     background: #ffece5;
     color: #ff5000;

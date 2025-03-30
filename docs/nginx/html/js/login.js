@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "index.html"
       } else {
         // 显示后端返回的错误信息
-        errorMessage.textContent = data.info || "登录失败，请检查账号密码"
+        errorMessage.textContent = data.info || "密码错误或用户名不存在"
         errorMessage.style.display = "block"
       }
     } catch (error) {

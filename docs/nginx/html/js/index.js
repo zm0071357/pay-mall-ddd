@@ -1,25 +1,93 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const modal = document.getElementById("paymentModal")
     const paymentAmount = document.getElementById("paymentAmount")
     const cancelPayment = document.getElementById("cancelPayment")
     const completePayment = document.getElementById("completePayment")
     const qrCodeImg = document.querySelector(".qr-code") // 获取二维码图片元素
+    const userId = getCookie("username") || "lzm0071357"; // 测试用默认值
+    let marketData = null;
+
+    // 新增：调用试算接口
+    try {
+        const response = await fetch("http://localhost:8091/api/gbm/index/query_group_buy_market_config", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                userId: userId,
+                source: "s01",
+                channel: "c01",
+                goodsId: "9890001"
+            })
+        });
+        const result = await response.json();
+
+        if (result.code === "0000") {
+            marketData = result.data;
+            // 更新促销信息
+            document.getElementById('promotionText').textContent =
+                `直降 ¥${(marketData.goods.originalPrice - marketData.goods.payPrice).toFixed(2)} 
+                ${marketData.teamStatistic.allTeamUserCount}人再抢，参与马上抢到`;
+
+            // 更新按钮价格
+            document.querySelector('.buy-alone').innerHTML =
+                `单独购买(￥${marketData.goods.originalPrice.toFixed(2)})`;
+            document.querySelector('.group-buy').innerHTML =
+                `开团购买(￥${marketData.goods.payPrice.toFixed(2)})`;
+
+            // 新增：动态生成拼单列表
+            const groupList = document.querySelector('.group-list');
+            groupList.innerHTML = ''; // 清空原有内容
+
+            marketData.teamList.forEach(team => {
+                const remaining = team.targetCount - team.lockCount;
+
+                const groupItem = document.createElement('div');
+                groupItem.className = 'group-item';
+                groupItem.innerHTML = `
+            <div>
+                <div class="user-info">${team.userId}</div>
+                <div class="group-status">
+                    <span>组队仅剩${remaining}人，拼单即将结束</span>
+                    <span class="countdown">${team.validTimeCountdown}</span>
+                </div>
+            </div>
+            <div class="right">
+                <button class="group-btn" 
+                        data-price="${marketData.goods.payPrice.toFixed(2)}">
+                    参与拼团
+                </button>
+            </div>
+        `;
+
+                groupList.appendChild(groupItem);
+            });
+
+            // 重新初始化倒计时（需要调整原有倒计时逻辑）
+            document.querySelectorAll('.countdown').forEach(el => {
+                new Countdown(el, el.textContent);
+            });
+        }
+    } catch (error) {
+        console.error("试算接口调用失败:", error);
+    }
 
     // 获取所有的按钮
     const buttons = document.querySelectorAll(".group-btn, .action-btn")
 
-    // 为每个按钮添加点击事件
-    buttons.forEach((button) => {
-        button.addEventListener("click", async function () {
-            var userId = getCookie("username");
+    // 修改后的按钮点击事件（原代码调整）
+    document.querySelectorAll(".action-btn").forEach(button => {
+        button.addEventListener("click", async function() {
             if (!userId) {
                 window.location.href = "login.html";
                 return;
             }
 
-            const price = this.getAttribute("data-price")
+            const isGroupBuy = this.classList.contains('group-buy');
+            const price = isGroupBuy ? marketData.goods.payPrice : marketData.goods.originalPrice;
+
             try {
-                // 调用创建支付订单接口
                 const response = await fetch("http://localhost:8099/api/pay/create_pay_order", {
                     method: "POST",
                     headers: {
@@ -27,15 +95,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify({
                         userId: userId,
-                        productId: "10001" // 固定productId为10001
+                        productId: "9890001",
+                        activityId: marketData.activityId,
+                        marketType: isGroupBuy ? 1 : 0
                     })
                 });
 
                 const result = await response.json();
-                if (result.code === "0000") { // 假设成功code为0000
-                    // 更新二维码图片和支付金额
+                if (result.code === "0000") {
                     qrCodeImg.src = result.data;
-                    paymentAmount.textContent = `支付金额：￥${price}`;
+                    paymentAmount.textContent = `支付金额：￥${price.toFixed(2)}`;
                     modal.style.display = "block";
                 } else {
                     alert(`支付失败：${result.info}`);
@@ -44,8 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("支付请求失败:", error);
                 alert("支付请求失败，请稍后重试");
             }
-        })
-    })
+        });
+    });
 
     // 隐藏支付弹窗
     function hidePaymentModal() {
@@ -104,13 +173,16 @@ document.addEventListener("DOMContentLoaded", () => {
     class Countdown {
         constructor(element, initialTime) {
             this.element = element;
-            this.remaining = this.parseTime(initialTime);
+            // 新增：处理带小时的时间格式
+            this.remaining = this.parseTime(initialTime.includes(':') ? initialTime : `00:${initialTime}`);
             this.timer = null;
             this.start();
         }
 
         parseTime(timeString) {
-            const [hours, minutes, seconds] = timeString.split(':').map(Number);
+            const parts = timeString.split(':');
+            if (parts.length === 2) parts.unshift('00'); // 处理mm:ss格式
+            const [hours, minutes, seconds] = parts.map(Number);
             return hours * 3600 + minutes * 60 + seconds;
         }
 
