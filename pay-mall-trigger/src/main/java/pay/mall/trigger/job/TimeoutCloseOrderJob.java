@@ -19,7 +19,7 @@ public class TimeoutCloseOrderJob {
     @Scheduled(cron = "0 0/10 * * * ?")
     public void exec() {
         try {
-            log.info("任务；超时30分钟订单关闭");
+            log.info("任务；超时10分钟订单关闭");
             List<String> orderIds = orderService.queryTimeoutCloseOrderList();
             if (null == orderIds || orderIds.isEmpty()) {
                 log.info("定时任务，超时10分钟订单关闭，暂无超时未支付订单 orderIds is null");
