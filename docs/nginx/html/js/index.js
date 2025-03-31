@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const userId = getCookie("username") || "lzm0071357"; // 测试用默认值
     let marketData = null;
 
-    // 新增：调用试算接口
+    // 调用试算接口
     try {
         const response = await fetch("http://localhost:8091/api/gbm/index/query_group_buy_market_config", {
             method: "POST",
@@ -40,26 +40,33 @@ document.addEventListener("DOMContentLoaded", async () => {
             const groupList = document.querySelector('.group-list');
             groupList.innerHTML = ''; // 清空原有内容
 
+            if (!marketData.teamList?.length) {
+                groupList.innerHTML = `<div class="no-data">暂无进行中的拼单</div>`;
+                return;
+            }
+
+            // 在动态生成拼单列表时添加teamId数据属性
             marketData.teamList.forEach(team => {
                 const remaining = team.targetCount - team.lockCount;
 
                 const groupItem = document.createElement('div');
                 groupItem.className = 'group-item';
                 groupItem.innerHTML = `
-            <div>
-                <div class="user-info">${team.userId}</div>
-                <div class="group-status">
-                    <span>组队仅剩${remaining}人，拼单即将结束</span>
-                    <span class="countdown">${team.validTimeCountdown}</span>
-                </div>
-            </div>
-            <div class="right">
-                <button class="group-btn" 
-                        data-price="${marketData.goods.payPrice.toFixed(2)}">
-                    参与拼团
-                </button>
-            </div>
-        `;
+                    <div>
+                        <div class="user-info">${team.userId}</div>
+                        <div class="group-status">
+                            <span>组队仅剩${remaining}人，拼单即将结束</span>
+                            <span class="countdown">${team.validTimeCountdown}</span>
+                        </div>
+                    </div>
+                    <div class="right">
+                        <button class="group-btn" 
+                                data-price="${marketData.goods.payPrice.toFixed(2)}"
+                                data-team-id="${team.teamId}"> <!-- 新增data-team-id属性 -->
+                            参与拼团
+                        </button>
+                    </div>
+                `;
 
                 groupList.appendChild(groupItem);
             });
@@ -73,46 +80,64 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("试算接口调用失败:", error);
     }
 
-    // 获取所有的按钮
-    const buttons = document.querySelectorAll(".group-btn, .action-btn")
+    // 统一支付方法
+    const createPayment = async (config) => {
+        const userId = getCookie("username");
+        if (!userId) {
+            window.location.href = "login.html";
+            return;
+        }
 
-    // 修改后的按钮点击事件（原代码调整）
-    document.querySelectorAll(".action-btn").forEach(button => {
-        button.addEventListener("click", async function() {
-            if (!userId) {
-                window.location.href = "login.html";
-                return;
+        try {
+            const response = await fetch("http://localhost:8099/api/pay/create_pay_order", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userId: userId,
+                    productId: "9890001",
+                    activityId: marketData?.activityId || "100123",
+                    ...config
+                })
+            });
+
+            const result = await response.json();
+            if (result.code === "0000") {
+                qrCodeImg.src = result.data;
+                paymentAmount.textContent = `支付金额：￥${config.price.toFixed(2)}`;
+                modal.style.display = "block";
+            } else {
+                alert(`支付失败：${result.info}`);
             }
+        } catch (error) {
+            console.error("支付请求失败:", error);
+            alert("支付请求失败，请稍后重试");
+        }
+    };
 
-            const isGroupBuy = this.classList.contains('group-buy');
-            const price = isGroupBuy ? marketData.goods.payPrice : marketData.goods.originalPrice;
+    // 事件绑定
+    document.querySelector('.buy-alone').addEventListener('click', () => {
+        createPayment({
+            marketType: 0,
+            teamId: null,
+            price: marketData?.goods.originalPrice || 0
+        });
+    });
 
-            try {
-                const response = await fetch("http://localhost:8099/api/pay/create_pay_order", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        userId: userId,
-                        productId: "9890001",
-                        activityId: marketData.activityId,
-                        marketType: isGroupBuy ? 1 : 0
-                    })
-                });
+    document.querySelector('.group-buy').addEventListener('click', () => {
+        createPayment({
+            marketType: 1,
+            teamId: null,
+            price: marketData?.goods.payPrice || 0
+        });
+    });
 
-                const result = await response.json();
-                if (result.code === "0000") {
-                    qrCodeImg.src = result.data;
-                    paymentAmount.textContent = `支付金额：￥${price.toFixed(2)}`;
-                    modal.style.display = "block";
-                } else {
-                    alert(`支付失败：${result.info}`);
-                }
-            } catch (error) {
-                console.error("支付请求失败:", error);
-                alert("支付请求失败，请稍后重试");
-            }
+    document.querySelector('.group-list').addEventListener('click', (event) => {
+        if (!event.target.classList.contains('group-btn')) return;
+        const button = event.target;
+        createPayment({
+            marketType: 1,
+            teamId: button.dataset.teamId,
+            price: parseFloat(button.dataset.price)
         });
     });
 
@@ -153,14 +178,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pagination = document.querySelector('.swiper-pagination');
     let currentIndex = 0;
 
-// 创建分页点
+    // 创建分页点
     for (let i = 0; i < 3; i++) {
         const dot = document.createElement('div');
         dot.className = `swiper-dot${i === 0 ? ' active' : ''}`;
         pagination.appendChild(dot);
     }
 
-// 自动轮播
+    // 自动轮播
     setInterval(() => {
         currentIndex = (currentIndex + 1) % 3;
         swiperWrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
@@ -169,7 +194,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }, 3000);
 
-// 倒计时逻辑（完整实现）
+    // 倒计时逻辑（完整实现）
     class Countdown {
         constructor(element, initialTime) {
             this.element = element;
